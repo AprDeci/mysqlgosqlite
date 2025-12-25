@@ -13,11 +13,20 @@ import (
 func main() {
 
 	dsn := "root:Luchen1122@tcp(localhost:3306)/test?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
-	exportSqlFile := "dump.sql"
+	exportSqlFile := "./localtest/dump.sql"
+
+	var err error
 
 	exportSql(dsn, exportSqlFile)
-	convert2sqliteFile(exportSqlFile, "dump_sqlite.sql")
-	Convert2Sqlite(exportSqlFile, "testDB.db")
+	err = convert2sqliteFile(exportSqlFile, "./localtest/dump_sqlite.sql")
+	if err != nil {
+		log.Fatalf("转换为 SQLite 失败: %v", err)
+	}
+	err = Convert2Sqlite(exportSqlFile, "./localtest/testDB.db")
+
+	if err != nil {
+		log.Fatalf("转换为 SQLite 失败: %v", err)
+	}
 
 }
 
@@ -68,6 +77,7 @@ func convert2sqliteFile(inputFile, outputFile string) error {
 }
 
 func Convert2Sqlite(inputFile, dbFile string) error {
+
 	// 检查输入文件是否存在
 	if _, err := os.Stat(inputFile); os.IsNotExist(err) {
 		return fmt.Errorf("输入文件不存在: %s", inputFile)
