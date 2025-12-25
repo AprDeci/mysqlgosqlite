@@ -19,11 +19,8 @@
 ```go
 package main
 
-import (
-	"log"
-
-	"mysqlgosqlite/pkg/mysqlgosqlite"
-)
+import "log"
+import "github.com/AprDeci/mysqlgosqlite"
 
 func main() {
 	const dsn = "root:password@tcp(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
