@@ -176,9 +176,5 @@ func ensureSQLiteFile(path string) error {
 		return fmt.Errorf("检查 SQLite 文件失败: %w", err)
 	}
 
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("创建 SQLite 文件失败: %w", err)
-	}
-	return f.Close()
+	return nil
 }
