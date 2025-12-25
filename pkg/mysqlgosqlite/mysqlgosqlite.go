@@ -106,7 +106,7 @@ func ConvertToSQLiteFile(inputFile, outputFile string, opts ...Option) error {
 		return fmt.Errorf("同步 SQLite SQL 文件失败: %w", err)
 	}
 
-	log.Printf("%s mysql2sqlite 转换完成\n", time.Now())
+	log.Printf("%s mysql2sqlite 转换完成\n", time.Now().Format("2006-01-02 15:04:05"))
 	return nil
 }
 
@@ -155,7 +155,7 @@ func ImportToSQLiteDB(inputFile, dbFile string, opts ...Option) error {
 		return fmt.Errorf("sqlite3 导入失败: %w, 错误信息: %s", err, stderr.String())
 	}
 
-	log.Printf("%s mysql2sqlite 导入完成\n", time.Now())
+	log.Printf("%s mysql2sqlite 导入完成\n", time.Now().Format("2006-01-02 15:04:05"))
 	return nil
 }
 
