@@ -1,4 +1,4 @@
-module mysqlgosqlite
+module github.com/AprDeci/mysqlgosqlite
 
 go 1.25.3
 
