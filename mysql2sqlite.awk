@@ -156,6 +156,49 @@ function finalize_alter_index(){
   reset_pending_index()
 }
 
+function insert_statement_complete(line){
+  return match(line, /;[ \t]*$/)
+}
+
+function append_insert_line(line){
+  if( insertBuffer == "" ){
+    insertBuffer = line
+  }
+  else {
+    insertBuffer = insertBuffer "\n" line
+  }
+}
+
+function process_insert_buffer(   line ){
+  if( insertBuffer == "" ){ return }
+  line = insertBuffer
+  prev = ""
+
+  gsub( /\\\\/, "\\_", line )
+
+  gsub( /\\'/, "''", line )
+  gsub( /\\n/, "\n", line )
+  gsub( /\\r/, "\r", line )
+  gsub( /\\"/, "\"", line )
+  gsub( /\\\032/, "\032", line )
+
+  gsub( /\\_/, "\\", line )
+
+  while( match( line, /0x[0-9a-fA-F]{17}/ ) ){
+    hexIssue = 1
+    sub( /0x[0-9a-fA-F]+/, substr( line, RSTART, RLENGTH-1 ), line )
+  }
+  if( hexIssue ){
+    printerr( \
+      NR ": WARN Hex number trimmed (length longer than 16 chars)." )
+    hexIssue = 0
+  }
+
+  print line
+  insertBuffer = ""
+  inInsertStatement = 0
+}
+
 # CREATE TRIGGER statements have funny commenting. Remember we are in trigger.
 /^\/\*.*(CREATE.*TRIGGER|create.*trigger)/ {
   gsub( /^.*(TRIGGER|trigger)/, "CREATE TRIGGER" )
@@ -187,35 +230,21 @@ inView != 0 { next }
 # skip PARTITION statements
 /^ *[(]?(PARTITION|partition) +[^ ]+/ { next }
 
-# print all INSERT lines
-( /^ *\(/ && /\) *[,;] *$/ ) || /^(INSERT|insert|REPLACE|replace)/ {
-  prev = ""
-
-  # first replace \\ by \_ that mysqldump never generates to deal with
-  # sequnces like \\n that should be translated into \n, not \<LF>.
-  # After we convert all escapes we replace \_ by backslashes.
-  gsub( /\\\\/, "\\_" )
-
-  # single quotes are escaped by another single quote
-  gsub( /\\'/, "''" )
-  gsub( /\\n/, "\n" )
-  gsub( /\\r/, "\r" )
-  gsub( /\\"/, "\"" )
-  gsub( /\\\032/, "\032" )  # substitute char
-
-  gsub( /\\_/, "\\" )
-
-  # sqlite3 is limited to 16 significant digits of precision
-  while( match( $0, /0x[0-9a-fA-F]{17}/ ) ){
-    hexIssue = 1
-    sub( /0x[0-9a-fA-F]+/, substr( $0, RSTART, RLENGTH-1 ), $0 )
+/^(INSERT|insert|REPLACE|replace)/ {
+  inInsertStatement = 1
+  insertBuffer = ""
+  append_insert_line($0)
+  if( insert_statement_complete($0) ){
+    process_insert_buffer()
   }
-  if( hexIssue ){
-    printerr( \
-      NR ": WARN Hex number trimmed (length longer than 16 chars)." )
-    hexIssue = 0
+  next
+}
+
+inInsertStatement && !/^(INSERT|insert|REPLACE|replace)/ {
+  append_insert_line($0)
+  if( insert_statement_complete($0) ){
+    process_insert_buffer()
   }
-  print
   next
 }
 
