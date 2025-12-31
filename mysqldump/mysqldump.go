@@ -106,6 +106,10 @@ func Dump(dsn string, opts ...DumpOption) error {
 		o.writer = os.Stdout
 	}
 
+	if o.timeFormat == "" {
+		o.timeFormat = "2006-01-02 15:04:05"
+	}
+
 	buf := bufio.NewWriter(o.writer)
 	defer buf.Flush()
 
@@ -165,7 +169,7 @@ func Dump(dsn string, opts ...DumpOption) error {
 
 		// 导出表数据
 		if o.isData {
-			err = writeTableData(db, table, buf)
+			err = writeTableData(db, table, buf, o.timeFormat)
 			if err != nil {
 				log.Printf("[error] %v \n", err)
 				return err
@@ -235,7 +239,7 @@ func writeTableStruct(db *sql.DB, table string, buf *bufio.Writer) error {
 
 // 禁止 golangci-lint 检查
 // nolint: gocyclo
-func writeTableData(db *sql.DB, table string, buf *bufio.Writer) error {
+func writeTableData(db *sql.DB, table string, buf *bufio.Writer, timeFormat string) error {
 
 	// 导出表数据
 	_, _ = buf.WriteString("-- ----------------------------\n")
@@ -316,14 +320,14 @@ func writeTableData(db *sql.DB, table string, buf *bufio.Writer) error {
 						log.Println("DATETIME 类型转换错误")
 						return err
 					}
-					ssql += fmt.Sprintf("'%s'", t.Format("2006-01-02 15:04:05"))
+					ssql += fmt.Sprintf("'%s'", t.Format(timeFormat))
 				case "TIMESTAMP":
 					t, ok := col.(time.Time)
 					if !ok {
 						log.Println("TIMESTAMP 类型转换错误")
 						return err
 					}
-					ssql += fmt.Sprintf("'%s'", t.Format("2006-01-02 15:04:05"))
+					ssql += fmt.Sprintf("'%s'", t.Format(timeFormat))
 				case "TIME":
 					t, ok := col.([]byte)
 					if !ok {

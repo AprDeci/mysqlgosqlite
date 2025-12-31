@@ -40,3 +40,9 @@ func main() {
 	}
 }
 ```
+
+`ExportSQL` 的第三个可选参数可以传入 `mysqldump.DumpOption`（需额外导入 `github.com/AprDeci/mysqlgosqlite/mysqldump`），例如需要保留 DATETIME/TIMESTAMP 的毫秒：
+
+```go
+mysqlgosqlite.ExportSQL(dsn, `dump.sql`, mysqldump.WithTimeFormat(`2006-01-02 15:04:05.000`))
+```

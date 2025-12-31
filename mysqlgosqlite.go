@@ -52,20 +52,21 @@ func resolveMysql2sqlitePath(o options) (string, error) {
 }
 
 // ExportSQL dumps MySQL data into a SQL file.
-func ExportSQL(dsn, outputFile string) error {
+func ExportSQL(dsn, outputFile string, dumpOpts ...mysqldump.DumpOption) error {
 	f, err := os.Create(outputFile)
 	if err != nil {
 		return fmt.Errorf("创建输出文件失败: %w", err)
 	}
 	defer f.Close()
 
-	if err := mysqldump.Dump(
-		dsn,
+	options := []mysqldump.DumpOption{
 		mysqldump.WithDropTable(),
 		mysqldump.WithData(),
 		mysqldump.WithWriter(f),
-		mysqldump.WithTimeFormat("2006-01-02 15:04:05.000"),
-	); err != nil {
+	}
+	options = append(options, dumpOpts...)
+
+	if err := mysqldump.Dump(dsn, options...); err != nil {
 		return fmt.Errorf("mysqldump 执行失败: %w", err)
 	}
 
