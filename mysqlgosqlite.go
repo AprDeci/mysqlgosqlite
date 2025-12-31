@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/jarvanstack/mysqldump"
+	"github.com/AprDeci/mysqlgosqlite/mysqldump"
 )
 
 // Option allows customizing command paths at runtime.
@@ -64,6 +64,7 @@ func ExportSQL(dsn, outputFile string) error {
 		mysqldump.WithDropTable(),
 		mysqldump.WithData(),
 		mysqldump.WithWriter(f),
+		mysqldump.WithTimeFormat("2006-01-02 15:04:05.000"),
 	); err != nil {
 		return fmt.Errorf("mysqldump 执行失败: %w", err)
 	}
