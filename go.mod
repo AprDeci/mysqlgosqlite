@@ -1,10 +1,7 @@
 module github.com/AprDeci/mysqlgosqlite
 
-go 1.25.3
+go 1.21.0
 
-require github.com/jarvanstack/mysqldump v0.7.0
+require github.com/go-sql-driver/mysql v1.9.3
 
-require (
-	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/go-sql-driver/mysql v1.9.3 // indirect
-)
+require filippo.io/edwards25519 v1.1.0 // indirect
